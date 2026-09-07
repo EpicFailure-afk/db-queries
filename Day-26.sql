@@ -81,3 +81,24 @@ AS
 	SELECT st_id, st_fname, St_Address
 	FROM Student
 	WHERE st_address = 'cairo'
+
+-- usefull to hide the actual table and also the actual columns names
+
+SELECT sname FROM Vcairo
+
+CREATE VIEW Valex (sid, sname, sadd)
+AS
+	SELECT st_id, st_fname, St_Address
+	FROM Student
+	WHERE st_address = 'alex'
+
+
+CREATE VIEW Valex_cairo (sid, sname, sadd)
+AS
+	SELECT * FROM Vcairo 
+	UNION ALL
+	SELECT * FROM Valex
+
+
+SELECT *  FROM Valex_cairo 
+ORDER BY sadd 

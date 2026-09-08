@@ -92,3 +92,130 @@ AS
 	END CATCH
 
 -- ------------------------------------
+CREATE PROC sumdata @x int, @y int
+AS
+		SELECT @x + @y
+	
+sumdata 3,9	  -- calling by parameter position
+sumdata @y=3, @x=9 -- calling by parameter name 
+
+-- default value
+AlTER PROC sumdata @x int, @y int=100
+AS
+		SELECT @x + @y
+
+sumdata 4
+
+-- -----------------------------------
+-- returned result is table
+CREATE PROC GetStbyAge @age1 int, @age2 int
+AS
+	SELECT St_Id, st_fname 
+	FROM Student
+	WHERE st_age BETWEEN @age1 AND @age2
+
+GetStbyAge 23, 28	
+
+-- Insert based on execute
+Declare @t TABLE(x int, y varchar(20))
+INSERT INTO @t
+EXECUTE GetStbyAge 23, 28
+SELECT COUNT(x) FROM @t 
+
+-- -----------------------------------------
+-- returned result is one value 
+-- deals like scalar function 
+
+CREATE PROC Getdata2 @id int
+AS
+	declare @age int 
+		SELECT @age=st_age
+		FROM Student 
+		WHERE St_ID=@id 
+	RETURN @age  -- return is not like return that with delcare 
+	-- but this query will success bc the return value is int
+	-- return at SP used to return the status not the value like in scalar function
+
+Declare @x int 
+SET @x=EXECUTE Getdata2 3
+SELECT @x
+
+-- correct query
+CREATE PROC Getdata2 @id int, @age int OUTPUT  -- like in and out at C# 
+AS
+	
+		SELECT @age=st_age
+		FROM Student 
+		WHERE St_ID=@id 
+
+Declare @x int 
+EXECUTE Getdata2 3, @x OUTPUT
+SELECT @x
+
+
+-- -----------------------------------------------------------------------
+-- trigger
+-- trigger on table level
+CREATE TRIGGER t1
+ON Student 
+AFTER INSERT 
+AS
+	SELECT 'WElcome to db'
+
+-- after any insert that happen at Student level will show that msg
+
+-- ------------------------
+CREATE TRIGGER t2
+ON Student 
+FOR UPDATE  -- for like after 
+AS
+	SELECT GETDATE()
+
+UPDATE Student
+	SET St_Age+=1
+
+-- ------------------------
+-- trigger to deny users from delete 
+CREATE TRIGGER t3
+ON Student 
+INSTEAD OF DELETE
+AS
+	SELECT 'Not Allowed For User: '+SUSER_NAME
+
+DLETE FROM Student WHERE st_id=779
+
+-- --------------------------
+-- make table read only
+CREATE TRIGGER t4
+ON Department
+INSTEAD OF DELETE, UPDATE, INSERT
+AS 
+	SELECT 'Not Allowed'
+
+-- --------------------------
+-- drop trigger 
+DROP TRIGGER t1
+
+-- --------------------------
+-- disable trigger
+ALTER TABLE Student DISABLE TRIGGER t3
+					-- ENABLE
+-- --------------------------
+CREATE TRIGGER t5
+ON Student
+FOR UPDATE  -- update here is the update query
+AS
+	if UPDATE(st_fname)  -- update here is a function
+		SELECT 'first name updated successfully'
+-- --------------------------
+-- use trigger for auditing
+CREATE TRIGGER t6
+ON Course
+AFTER UPDATE 
+AS
+	SELECT * FROM inserted -- data after update 
+	SELECT * FROM deleted -- data before update 
+
+UPDATE Course
+	SET crs_name='cloud', Crs_Duration=45
+WHERE Crs_Id=100

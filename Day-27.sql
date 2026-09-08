@@ -74,7 +74,21 @@ AS
 		VALUES (@id, @name)
 	END TRY
 	BEGIN CATCH
-		SELECT 'Duplicate ID' AS "msg"
+		SELECT 'Duplicate ID' AS "msg"   -- should hide the error itself
 	END CATCH
 
 InstSt 1, 'ahmed'  
+
+
+-- alter proc
+ALTER PROC InstSt @id int, @name varchar(10)
+AS
+	BEGIN TRY
+		INSERT INTO Student (st_id, st_fname)
+		VALUES (@id, @name)
+	END TRY
+	BEGIN CATCH
+		SELECT 'Error' AS "msg"
+	END CATCH
+
+-- ------------------------------------

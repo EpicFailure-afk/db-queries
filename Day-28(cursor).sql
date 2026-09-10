@@ -83,9 +83,7 @@ FETCH c1 INTO @name
 WHILE @@FETCH_STATUS=0
 	BEGIN
 		if @name='ahmed'
-			BEGIN
-				SET @flag=1
-			END
+			SET @flag=1
 		if @name='ali'
 			BEGIN
 				if @flag=1
